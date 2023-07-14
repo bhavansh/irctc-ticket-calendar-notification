@@ -96,12 +96,12 @@ def generate_event(passenger_list, train_details, email_address):
         'reminders': {
             'useDefault': False,
             'overrides': [
-                # {'method': 'popup', 'minutes': (departure_datetime - alarm1).total_seconds() // 60},
+                {'method': 'popup', 'minutes': (departure_datetime - alarm1).total_seconds() // 60},
                 {'method': 'popup', 'minutes': (departure_datetime - alarm2).total_seconds() // 60},
                 {'method': 'popup', 'minutes': (departure_datetime - alarm3).total_seconds() // 60},
                 {'method': 'popup', 'minutes': (departure_datetime - alarm4).total_seconds() // 60},
                 {'method': 'popup', 'minutes': (departure_datetime - alarm5).total_seconds() // 60},
-                {'method': 'popup', 'minutes': (departure_datetime - test_time).total_seconds() // 60},
+                # {'method': 'popup', 'minutes': (departure_datetime - test_time).total_seconds() // 60},
             ]
         }
     }
