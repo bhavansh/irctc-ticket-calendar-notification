@@ -107,6 +107,7 @@ def generate_event(passenger_list, train_details, email_address):
             }
         }
     except:
+        print("-------- Error in generating event")
         event = False
     return event
 
