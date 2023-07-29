@@ -64,47 +64,50 @@ def generate_event_description(passenger_list,train_details):
     return description
 
 def generate_event(passenger_list, train_details, email_address):
-    description = generate_event_description(passenger_list[1],train_details)
-    departure_datetime = datetime.strptime(train_details['Scheduled Departure*'], '%d-%b-%Y %H:%M')
-    arrival_datetime = datetime.strptime(train_details['Scheduled Arrival'], '%d-%b-%Y %H:%M')
-    # print("-------- Departure Date : ", departure_datetime)
-    # print("-------- Arrival Date : ", arrival_datetime)
-    # Calculate the reminder time (9 PM on the previous day)
-    test_time = (departure_datetime - timedelta(days=1)).replace(hour=18, minute=56)
-    alarm1 = departure_datetime.replace(hour=5, minute=0)
-    alarm2 = departure_datetime.replace(hour=5, minute=30)
-    alarm3 = departure_datetime.replace(hour=6, minute=0)
-    alarm4 = departure_datetime.replace(hour=6, minute=15)
-    alarm5 = departure_datetime.replace(hour=6, minute=30)
+    try:
+        description = generate_event_description(passenger_list[1],train_details)
+        departure_datetime = datetime.strptime(train_details['Scheduled Departure*'], '%d-%b-%Y %H:%M')
+        arrival_datetime = datetime.strptime(train_details['Scheduled Arrival'], '%d-%b-%Y %H:%M')
+        # print("-------- Departure Date : ", departure_datetime)
+        # print("-------- Arrival Date : ", arrival_datetime)
+        # Calculate the reminder time (9 PM on the previous day)
+        test_time = (departure_datetime - timedelta(days=1)).replace(hour=18, minute=56)
+        alarm1 = departure_datetime.replace(hour=5, minute=0)
+        alarm2 = departure_datetime.replace(hour=5, minute=30)
+        alarm3 = departure_datetime.replace(hour=6, minute=0)
+        alarm4 = departure_datetime.replace(hour=6, minute=15)
+        alarm5 = departure_datetime.replace(hour=6, minute=30)
 
-    event = {
-        'summary': f"IRCTC Ticket : (PNR : {train_details['PNR No.']})",
-        'description': description,
-        'start': {
-            'dateTime': departure_datetime.isoformat(),
-            'timeZone': 'Asia/Kolkata',  # Set to Indian Standard Time (IST)
-        },
-        'end': {
-            'dateTime': arrival_datetime.isoformat(),
-            'timeZone': 'Asia/Kolkata',  # Set to Indian Standard Time (IST)
-        },
-        'startLocation': train_details["From"],
-        'endLocation': train_details["To"],
-        # 'attendees': [
-        #     {'email': email_address, 'notification': {'method': 'popup', 'minutes': remainder_time}},
-        # ],
-        'reminders': {
-            'useDefault': False,
-            'overrides': [
-                {'method': 'popup', 'minutes': (departure_datetime - alarm1).total_seconds() // 60},
-                {'method': 'popup', 'minutes': (departure_datetime - alarm2).total_seconds() // 60},
-                {'method': 'popup', 'minutes': (departure_datetime - alarm3).total_seconds() // 60},
-                {'method': 'popup', 'minutes': (departure_datetime - alarm4).total_seconds() // 60},
-                {'method': 'popup', 'minutes': (departure_datetime - alarm5).total_seconds() // 60},
-                # {'method': 'popup', 'minutes': (departure_datetime - test_time).total_seconds() // 60},
-            ]
+        event = {
+            'summary': f"IRCTC Ticket : (PNR : {train_details['PNR No.']})",
+            'description': description,
+            'start': {
+                'dateTime': departure_datetime.isoformat(),
+                'timeZone': 'Asia/Kolkata',  # Set to Indian Standard Time (IST)
+            },
+            'end': {
+                'dateTime': arrival_datetime.isoformat(),
+                'timeZone': 'Asia/Kolkata',  # Set to Indian Standard Time (IST)
+            },
+            'startLocation': train_details["From"],
+            'endLocation': train_details["To"],
+            # 'attendees': [
+            #     {'email': email_address, 'notification': {'method': 'popup', 'minutes': remainder_time}},
+            # ],
+            'reminders': {
+                'useDefault': False,
+                'overrides': [
+                    {'method': 'popup', 'minutes': (departure_datetime - alarm1).total_seconds() // 60},
+                    {'method': 'popup', 'minutes': (departure_datetime - alarm2).total_seconds() // 60},
+                    {'method': 'popup', 'minutes': (departure_datetime - alarm3).total_seconds() // 60},
+                    {'method': 'popup', 'minutes': (departure_datetime - alarm4).total_seconds() // 60},
+                    {'method': 'popup', 'minutes': (departure_datetime - alarm5).total_seconds() // 60},
+                    # {'method': 'popup', 'minutes': (departure_datetime - test_time).total_seconds() // 60},
+                ]
+            }
         }
-    }
+    except:
+        event = False
     return event
 
 def if_travel_date_in_future(details):
@@ -229,7 +232,8 @@ def fetch_create_irctc_events(credentials, calendar_id, calendar_notifications, 
             # print("-------- Event already exists for date:", train_details['Date Of Boarding'])
         else:
             irctc_event = generate_event(passenger_details, train_details, email_address)
-            success = calendar_service.events().insert(calendarId=calendar_id, sendNotifications=True, body=irctc_event).execute()
+            if(irctc_event):
+                success = calendar_service.events().insert(calendarId=calendar_id, sendNotifications=True, body=irctc_event).execute()
             # print('Event created:', success['id'])
 
 # Main execution
